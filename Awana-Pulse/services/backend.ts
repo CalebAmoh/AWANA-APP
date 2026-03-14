@@ -4,7 +4,8 @@ import { MOCK_KIDS } from '../constants';
 const STORAGE_KEY = 'awana_pulse_data_v1';
 const AUTH_KEY = 'awana_pulse_auth_token';
 const DELAY_MS = 300; // Simulate network latency
-const API_URL = 'http://localhost:5000/v1/api/awana_pulse'; // Configure your API endpoint here
+// const API_URL = 'http://localhost:5005/v1/api/awana_pulse'; // Configure your API endpoint here
+const API_URL = (import.meta as any).env.VITE_API_URL;
 
 // Helper to simulate network delay
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -18,23 +19,23 @@ class BackendService {
       return MOCK_KIDS;
     }
     try {
-        const parsed = JSON.parse(stored);
-        if (!Array.isArray(parsed)) {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_KIDS));
-            return MOCK_KIDS;
-        }
-        // Sanitize: ensure all kids have IDs. Filter out corrupted records.
-        const validKids = parsed.filter((k: any) => k && typeof k.id === 'string' && k.id.length > 0);
-        
-        // If we filtered out bad data, update storage to clean it up
-        if (validKids.length !== parsed.length) {
-            this.setStoredData(validKids);
-        }
-        
-        return validKids;
-    } catch (e) {
-        console.error("Error parsing stored data", e);
+      const parsed = JSON.parse(stored);
+      if (!Array.isArray(parsed)) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_KIDS));
         return MOCK_KIDS;
+      }
+      // Sanitize: ensure all kids have IDs. Filter out corrupted records.
+      const validKids = parsed.filter((k: any) => k && typeof k.id === 'string' && k.id.length > 0);
+
+      // If we filtered out bad data, update storage to clean it up
+      if (validKids.length !== parsed.length) {
+        this.setStoredData(validKids);
+      }
+
+      return validKids;
+    } catch (e) {
+      console.error("Error parsing stored data", e);
+      return MOCK_KIDS;
     }
   }
 
@@ -45,22 +46,22 @@ class BackendService {
   // --- API METHODS ---
 
   async login(email: string, password: string): Promise<boolean> {
-      await delay(800);
-      // Simple mock authentication
-      if (email.toLowerCase() === 'admin@awana.org' && password === 'password') {
-          localStorage.setItem(AUTH_KEY, 'mock-jwt-token-xyz-123');
-          return true;
-      }
-      return false;
+    await delay(800);
+    // Simple mock authentication
+    if (email.toLowerCase() === 'admin@awana.org' && password === 'password') {
+      localStorage.setItem(AUTH_KEY, 'mock-jwt-token-xyz-123');
+      return true;
+    }
+    return false;
   }
 
   async logout(): Promise<void> {
-      await delay(200);
-      localStorage.removeItem(AUTH_KEY);
+    await delay(200);
+    localStorage.removeItem(AUTH_KEY);
   }
 
   isAuthenticated(): boolean {
-      return !!localStorage.getItem(AUTH_KEY);
+    return !!localStorage.getItem(AUTH_KEY);
   }
 
   async getKids(): Promise<Kid[]> {
