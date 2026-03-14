@@ -1,5 +1,5 @@
 //IMPORTS
-// require("dotenv").config();
+require("dotenv").config();
 
 // const cookieParser = require("cookie-parser");
 const express = require("express");
@@ -10,7 +10,7 @@ const cors = require('cors');
 
 //create express app and get port for connection
 const app = express(); //create express app
-const port = 5000; //port for serve
+const port = process.env.PORT || 5000; //port for serve
 
 // Enable CORS for all routes
 app.use(cors());
